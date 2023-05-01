@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Chat Room</title>
+</head>
+
+<body>
+    <h1>Chat Room <span id="room-name"></span></h1>
+    <div id="message-list"></div>
+    <div>
+        <input type="text" id="username-input" placeholder="Your name">
+        <input type="text" id="message-input">
+        <button id="send-button">Send</button>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const roomName = window.location.pathname.slice(1);
+        const roomNameElement = document.getElementById('room-name');
+        const messageList = document.getElementById('message-list');
+        const usernameInput = document.getElementById('username-input');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        roomNameElement.innerText = roomName;
+
+        socket.on('connect', () => {
+            socket.emit('join', roomName);
+
+            sendButton.addEventListener('click', () => {
+                const username = usernameInput.value.trim() || 'Anonymous';
+                const message = messageInput.value.trim();
+                if (message) {
+                    socket.emit('message', {
+                        username,
+                        message
+                    });
+                    messageInput.value = '';
+                }
+            });
+
+            socket.on('message', ({
+                username,
+                message
+            }) => {
+                const div = document.createElement('div');
+                div.innerText = `${username}: ${message}`;
+                messageList.appendChild(div);
+            });
+        });
+    </script>
+</body>
+
+</html>
