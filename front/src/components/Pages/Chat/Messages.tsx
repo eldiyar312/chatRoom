@@ -16,6 +16,7 @@ const Messages = () => {
     const [events, setEvents] = React.useState<Array<string>>([])
     const { chatId } = useParams()
     const mounted = React.useRef(false)
+    const messageBlock = React.useRef<HTMLDivElement>(null)
 
     React.useEffect(() => {
         // create even for listening channel
@@ -24,6 +25,10 @@ const Messages = () => {
             setEvents((prevData) => [...prevData, event])
             socket.on(event, (message: TMessage) => {
                 setMessages((prevData) => [...prevData, message])
+
+                // scroll to bottom
+                const scrollBar = messageBlock.current as HTMLDivElement
+                scrollBar.scrollTop = scrollBar.scrollHeight
             })
         }
         // clean
@@ -31,36 +36,29 @@ const Messages = () => {
         return () => {
             mounted.current = true
         }
-    }, [chatId, events])
+    }, [chatId, events, messageBlock])
 
     return (
         <Box
             sx={{
-                display: 'block',
+                pl: 1,
+                display: 'flex',
                 height: '100%',
                 width: '100%',
+                overflow: 'auto',
+                scrollBehavior: 'smooth',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
             }}
+            ref={messageBlockScroll}
         >
-            <Box
-                sx={{
-                    pl: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    alignItems: 'flex-start',
-                    height: '100%',
-                    width: '100%',
-                    overflow: 'auto',
-                }}
-            >
-                {messages.length ? (
-                    messages.map((message, index) => (
-                        <Message key={index} name={message.username} text={message.message} />
-                    ))
-                ) : (
-                    <></>
-                )}
-            </Box>
+            {messages.length ? (
+                messages.map((message, index) => (
+                    <Message key={index} name={message.username} text={message.message} />
+                ))
+            ) : (
+                <></>
+            )}
         </Box>
     )
 }
