@@ -50,7 +50,7 @@ const Messages = () => {
                 flexDirection: 'column',
                 alignItems: 'flex-start',
             }}
-            ref={messageBlockScroll}
+            ref={messageBlock}
         >
             {messages.length ? (
                 messages.map((message, index) => (
